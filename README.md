@@ -1,7 +1,7 @@
 # deeDum
 Generators and display for "Tweedledee and Tweedledum" logic puzzles from "Alice in Puzzle-Land" by Raymond Smullyan.
 
-*Try out a live example (here)[https://dmackinnon1.github.io/deeDum/]*
+*Try out a live example [here](https://dmackinnon1.github.io/deeDum/)*
 
 ## Building the Puzzles
 
