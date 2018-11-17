@@ -65,13 +65,13 @@ def selfStatement(number, name, card):
     return {'text': "My name is " + name + ", and I have a " + card + " card.", 'list': intersect(broForName(number, name),broForCard(number,card))}
 
 def selfOrStatement(number, name, card):
-    return {'text': "My name is " + name + " or I have a " + card + " card.", 'list': union(broForName(number, name),broForCard(number,card))}
+    return {'text': "Either my name is " + name + ", or I have a " + card + " card.", 'list': union(broForName(number, name),broForCard(number,card))}
 
 def otherStatement(number, name, card):
     return {'text': "My brother's name is " + name + ", and he has a " + card + " card.", 'list': intersect(broForName(number, name),broForCard(number,card))}
 
 def otherOrStatement(number, name, card):
-    return {'text': "My brother's name is " + name + " or he has a " + card + " card.", 'list': union(broForName(number, name),broForCard(number,card))}
+    return {'text': "Either my brother's name is " + name + ", or he has a " + card + " card.", 'list': union(broForName(number, name),broForCard(number,card))}
 
 def selfNameStatement(number, name):
     return {'text': "My name is " + name + ".", 'list': broForName(number, name)}
@@ -120,7 +120,7 @@ def goalFromStatements(b0_statement, b1_statement):
     puzzle = {}
     b0s = b0_statement['list']
     b1s = b1_statement['list']
-    b0t = intersect(b0s, bro0Truths) 
+    b0t = intersect(b0s, bro0Truths)
     b0l = intersect(complement(b0s), bro0Lies)
     b0 = union(b0t, b0l)
     b1t = intersect(b1s, bro1Truths) 
@@ -128,15 +128,80 @@ def goalFromStatements(b0_statement, b1_statement):
     b1 = union(b1t, b1l)
     hiddenGoal = intersect(b0,b1)
     if (len(hiddenGoal) == 1):
+        explain = ""
+        explain += "If the first brother is telling the truth, " + textFromGoal(0,b0t)
+        explain += "<br> If the first brother is lying, " + textFromGoal(0,b0l)
+        explain += "<br> If the second brother is telling the truth, " + textFromGoal(1,b1t)
+        explain += "<br> If the second brother is lying, " + textFromGoal(1,b1l)
+        explain += "<br> So, overall, we can determine that " + textFromGoal(0, hiddenGoal)
         puzzle['bro0_text'] = b0_statement['text']
         puzzle['bro1_text'] = b1_statement['text']
         puzzle['solution'] = hiddenGoal[0]
+        puzzle['explanation'] = explain
         return puzzle
     else:
         return None
 
-# puzzle json
+def optionsFromGoals(i,j, goals):
+    firstPass = [g[i][j] for g in goals]
+    secondPass = []
+    for g in firstPass:
+        if g not in secondPass:
+            secondPass.append(g)
+    return secondPass
 
+def otherName(name):
+    if name == "Tweedledee":
+        return "Tweedledum"
+    else:
+        return "Tweedledee"
+
+def textFromGoal(index, goalList):
+    if (len(goalList) == 0):
+        return "there cannot be any solutions."
+    bro = ""
+    other = ""
+    if (index == 0):
+        bro = "first"
+        other = "second"
+    else :
+        bro = "second"
+        other = "first"
+    broNames = optionsFromGoals(index, 0, goalList)
+    broCards = optionsFromGoals(index, 1, goalList)
+    otherNames = optionsFromGoals((index +1)%2, 0, goalList)
+    otherCards = optionsFromGoals((index +1)%2, 1, goalList)
+
+    txt = "the " + bro + " brother could "
+    if len(broNames) == 2:
+        txt += "be either " + prettyList(broNames, "or")
+    else:
+        txt += "only be " + broNames[0]
+        txt += " and the " + other + " brother must be " + otherName(broNames[0])
+    
+    txt += "; the " + bro + " brother's card must be " + prettyList(broCards, "or")
+    txt += "; and the " + other + " brother's card must be " + prettyList(otherCards, "or")    
+    txt += "."
+    return txt        
+
+def prettyList(list, conj):
+    isFirst = True;
+    result = ""        
+    count = 1
+    size = len(list)
+    for s in list:
+        if not isFirst and size > 2:
+            result += ", "
+        isFirst  = False
+        if count == size and size > 1:
+            if (size == 2):
+                result += " "
+            result += conj + " "
+        count = count +1
+        result += s
+    return result
+
+# puzzle json
 def jsonForPuzzle(puzzle):
     json = '{"bro0": "' + puzzle['bro0_text'] + '", ' 
     json += ' "bro1": "' + puzzle['bro1_text'] + '", '  
@@ -145,6 +210,7 @@ def jsonForPuzzle(puzzle):
     json += ' "bro0_card": "' + puzzle['solution'][0][1] + '", '  
     json += ' "bro1_card": "' + puzzle['solution'][1][1] + '", '     
     json += ' "solution": "' + str(puzzle['solution']) + '", '
+    json += ' "explanation": "' + puzzle['explanation'] + '", '  
     json += ' "id": "' + str(puzzle['id']) + '"}' + '\n'
     return json
 
