@@ -142,13 +142,14 @@ def goalFromStatements(b0_statement, b1_statement):
     else:
         return None
 
-def optionsFromGoals(i,j, goals):
-    firstPass = [g[i][j] for g in goals]
-    secondPass = []
-    for g in firstPass:
-        if g not in secondPass:
-            secondPass.append(g)
-    return secondPass
+def optionsFromGoals(i, goals):
+    #firstPass = [g[i][j] for g in goals]
+    #secondPass = []
+    #for g in firstPass:
+    #    if g not in secondPass:
+    #        secondPass.append(g)
+    #return secondPass
+    return [g[i] for g in goals]
 
 def otherName(name):
     if name == "Tweedledee":
@@ -167,22 +168,45 @@ def textFromGoal(index, goalList):
     else :
         bro = "second"
         other = "first"
-    broNames = optionsFromGoals(index, 0, goalList)
-    broCards = optionsFromGoals(index, 1, goalList)
-    otherNames = optionsFromGoals((index +1)%2, 0, goalList)
-    otherCards = optionsFromGoals((index +1)%2, 1, goalList)
-
-    txt = "the " + bro + " brother could "
-    if len(broNames) == 2:
-        txt += "be either " + prettyList(broNames, "or")
-    else:
-        txt += "only be " + broNames[0]
-        txt += " and the " + other + " brother must be " + otherName(broNames[0])
+    firstBro = optionsFromGoals(index, goalList)
+    secondBro = optionsFromGoals((index +1)%2, goalList)
     
-    txt += "; the " + bro + " brother's card must be " + prettyList(broCards, "or")
-    txt += "; and the " + other + " brother's card must be " + prettyList(otherCards, "or")    
+    txt = "the " + bro + " brother could be "
+    firstBro = reduceList(firstBro)
+    txt += combinedList(firstBro)
+    #if len(broNames) == 2:
+    #    txt += "be either " + prettyList(broNames, "or")
+    #else:
+    #    txt += "only be " + broNames[0]
+    #    txt += " and the " + other + " brother must be " + otherName(broNames[0])
+    
+    #txt += "; the " + bro + " brother's card must be " + prettyList(broCards, "or")
+    #txt += "; and the " + other + " brother's card must be " + prettyList(otherCards, "or")    
+    #txt += "."
+    txt += "; and the other brother could be "
+    secondBro = reduceList(secondBro)
+    txt += combinedList(secondBro)
     txt += "."
     return txt        
+
+def reduceList(broList):
+    copy = []
+    for b in broList:
+        if (notInList(copy, b)):
+            copy.append(b) 
+    return copy 
+            
+def notInList(broList, b):
+    for a in broList:
+        if (a[0] == b[0]) & (a[1] == b[1]):
+            return False
+    return True
+
+def combinedList(broList):
+    combined = []
+    for b in broList:
+        combined.append(b[0] + " holding a " + b[1] + " card")
+    return prettyList(combined, "or")
 
 def prettyList(list, conj):
     isFirst = True;
