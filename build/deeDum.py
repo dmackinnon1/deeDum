@@ -134,6 +134,15 @@ def goalFromStatements(b0_statement, b1_statement):
         explain += "<br> If the second brother is telling the truth, " + textFromGoal(1,b1t)
         explain += "<br> If the second brother is lying, " + textFromGoal(1,b1l)
         explain += "<br> So, overall, we can determine that " + textFromGoal(0, hiddenGoal)
+        if (isLying(0,hiddenGoal[0])):
+            explain += "<br> The first brother was lying, and "
+        else :
+            explain += "<br> The first brother was telling the truth, and "
+        
+        if (isLying(1,hiddenGoal[0])):
+            explain += "the second brother was lying."
+        else :
+            explain += "the second brother was telling the truth."
         puzzle['bro0_text'] = b0_statement['text']
         puzzle['bro1_text'] = b1_statement['text']
         puzzle['solution'] = hiddenGoal[0]
@@ -143,12 +152,6 @@ def goalFromStatements(b0_statement, b1_statement):
         return None
 
 def optionsFromGoals(i, goals):
-    #firstPass = [g[i][j] for g in goals]
-    #secondPass = []
-    #for g in firstPass:
-    #    if g not in secondPass:
-    #        secondPass.append(g)
-    #return secondPass
     return [g[i] for g in goals]
 
 def otherName(name):
@@ -171,23 +174,17 @@ def textFromGoal(index, goalList):
     firstBro = optionsFromGoals(index, goalList)
     secondBro = optionsFromGoals((index +1)%2, goalList)
     
-    txt = "the " + bro + " brother could be "
+    txt = "the " + bro + " brother is "
     firstBro = reduceList(firstBro)
     txt += combinedList(firstBro)
-    #if len(broNames) == 2:
-    #    txt += "be either " + prettyList(broNames, "or")
-    #else:
-    #    txt += "only be " + broNames[0]
-    #    txt += " and the " + other + " brother must be " + otherName(broNames[0])
-    
-    #txt += "; the " + bro + " brother's card must be " + prettyList(broCards, "or")
-    #txt += "; and the " + other + " brother's card must be " + prettyList(otherCards, "or")    
-    #txt += "."
-    txt += "; and the other brother could be "
+    txt += "; and the other brother is "
     secondBro = reduceList(secondBro)
     txt += combinedList(secondBro)
     txt += "."
     return txt        
+
+def isLying(index, goal):
+    return goal[index][1] == 'black'
 
 def reduceList(broList):
     copy = []
